@@ -1,5 +1,4 @@
-import discord
-from discord import Embed, ButtonStyle
+from discord import Embed, ButtonStyle, Color, utils #, Forbidden
 from discord.ext import commands
 from discord.ui import Button, View
 from datetime import datetime, timedelta
@@ -25,9 +24,10 @@ class Calendar(commands.Cog):
             return
     
         today = datetime.today()
-        embed = discord.Embed(title="📅 Reservation Calendar",
-                              description="Choose a day to make a reservation",
-                              color=discord.Color.blue())
+        embed = Embed(
+            title="📅 Reservation Calendar",
+            description="Choose a day to make a reservation",
+            color=Color.blue())
 
         buttons = View()
 
@@ -35,7 +35,7 @@ class Calendar(commands.Cog):
             day = today + timedelta(days=i)
             date_str = day.strftime("%d/%m/%Y")
 
-            button = Button(label=date_str, style=discord.ButtonStyle.green)
+            button = Button(label=date_str, style=ButtonStyle.green)
 
             async def callback(interaction, date=date_str):
                 await self.show_times(interaction, date)
@@ -47,9 +47,10 @@ class Calendar(commands.Cog):
 
     # ---------------- Show times for a selected day ----------------
     async def show_times(self, interaction, date):
-        embed = discord.Embed(title=f"⏰ Choose starting time on {date}",
-                              description="Then choose the ending time",
-                              color=discord.Color.green())
+        embed = Embed(
+            title=f"⏰ Choose starting time on {date}",
+            description="Then choose the ending time",
+            color=Color.green())
 
         buttons = View()
 
@@ -57,14 +58,10 @@ class Calendar(commands.Cog):
             time_slot = f"{hour:02d}:00"
 
             # Already reserved -> red button disabled
-            if date in self.reservations and time_slot in self.reservations[
-                    date]:
-                button = Button(label=time_slot,
-                                style=discord.ButtonStyle.red,
-                                disabled=True)
+            if date in self.reservations and time_slot in self.reservations[date]:
+                button = Button( label=time_slot, style=ButtonStyle.red, disabled=True)
             else:
-                button = Button(label=time_slot,
-                                style=discord.ButtonStyle.blurple)
+                button = Button(label=time_slot, style=ButtonStyle.blurple)
 
                 async def callback(interaction, h=time_slot, d=date):
                     await self.choose_end(interaction, d, h)
@@ -73,46 +70,35 @@ class Calendar(commands.Cog):
 
             buttons.add_item(button)
 
-        await interaction.response.send_message(embed=embed,
-                                                view=buttons,
-                                                ephemeral=True)
+        await interaction.response.send_message(embed=embed, view=buttons, ephemeral=True)
 
     # ---------------- Choose ending time ----------------
     async def choose_end(self, interaction, date, start_time):
-        embed = discord.Embed(
+        embed = Embed(
             title=f"📌 Reserve on {date}",
             description=f"Start: {start_time}\nNow choose the ending time:",
-            color=discord.Color.purple())
+            color=Color.purple())
 
         buttons = View()
         start_hour = int(start_time.split(":")[0])
 
         for hour in range(start_hour + 1, 22):
             end_time = f"{hour:02d}:00"
-            conflict = any(f"{h:02d}:00" in self.reservations.get(date, {})
-                           for h in range(start_hour, hour))
+            conflict = any(f"{h:02d}:00" in self.reservations.get(date, {}) for h in range(start_hour, hour))
 
             if conflict:
-                button = Button(label=end_time,
-                                style=discord.ButtonStyle.red,
-                                disabled=True)
+                button = Button( label=end_time, style=ButtonStyle.red, isabled=True)
             else:
-                button = Button(label=end_time,
-                                style=discord.ButtonStyle.green)
+                button = Button(label=end_time, style=ButtonStyle.green)
 
-                async def callback(interaction,
-                                   d=date,
-                                   i=start_time,
-                                   f=end_time):
+                async def callback(interaction, d=date, i=start_time, f=end_time):
                     await self.reserve_slot(interaction, d, i, f)
 
                 button.callback = callback
 
             buttons.add_item(button)
 
-        await interaction.response.send_message(embed=embed,
-                                                view=buttons,
-                                                ephemeral=True)
+        await interaction.response.send_message(embed=embed, view=buttons, ephemeral=True)
 
     # ---------------- Reserve the slot ----------------
     async def reserve_slot(self, interaction, date, start_time, end_time):
@@ -142,7 +128,7 @@ class Calendar(commands.Cog):
         #     await interaction.user.send(
         #         f"✅ Your reservation on **{date}** from **{start_time}** to **{end_time}** has been confirmed!"
         #     )
-        # except discord.Forbidden:
+        # except Forbidden:
         #     await interaction.response.send_message(
         #         f"⚠️ {interaction.user.mention}, I couldn’t send you a DM. Please enable DMs to receive confirmations.",
         #         ephemeral=True)
@@ -170,40 +156,47 @@ class Calendar(commands.Cog):
 
     # ---------------- Send reservation to approval channel ----------------
     async def send_for_approval(self, user, date, start_time, end_time):
-        channel = discord.utils.get(self.bot.get_all_channels(), name="📝pending-approval")  
+        start_hour = int(start_time.split(":")[0])
+        end_hour = int(end_time.split(":")[0])
+        channel = utils.get(self.bot.get_all_channels(), name="📝pending-approval")  
 
         if not channel:
             print("❌ Canal 'pending-approval' não encontrado.")
             return
 
-        embed = discord.Embed(
+        embed = Embed(
             title="📝 Nova reserva pendente",
             description=f"**Usuário:** {user.mention}\n"
                         f"**Data:** {date}\n"
                         f"**Início:** {start_time}\n"
                         f"**Fim:** {end_time}",
-            color=discord.Color.orange()
+            color=Color.orange()
         )
 
         view = View()
 
-        approve_btn = Button(label="Aprovar ✅", style=discord.ButtonStyle.green)
-        reject_btn = Button(label="Recusar ❌", style=discord.ButtonStyle.red)
+        approve_btn = Button(label="Aprovar ✅", style=ButtonStyle.green)
+        reject_btn = Button(label="Recusar ❌", style=ButtonStyle.red)
 
         async def approve_callback(interaction):
-            role = discord.utils.get(interaction.guild.roles, name="Teacher")
+            role = utils.get(interaction.guild.roles, name="Teacher")
             if role not in interaction.user.roles:
                 await interaction.response.send_message("⚠️ Você não tem permissão para aprovar reservas.", ephemeral=True)
                 return
+            
+            self.reservations[date][f"{start_hour:02d}:00-{end_hour:02d}:00"]["status"] ="aproved"
 
             await user.send(f"🎉 Sua reserva em **{date}** das **{start_time}** às **{end_time}** foi **APROVADA**!")
             await channel.send(f"✅ Reserva de {user.mention} aprovada por {interaction.user.mention}")
 
         async def reject_callback(interaction):
-            role = discord.utils.get(interaction.guild.roles, name="Teacher")
+            role = utils.get(interaction.guild.roles, name="Teacher")
             if role not in interaction.user.roles:
                 await interaction.response.send_message("⚠️ Você não tem permissão para recusar reservas.", ephemeral=True)
                 return
+
+            self.reservations[date][f"{start_hour:02d}:00-{end_hour:02d}:00"]["status"] = "rejected"
+    
 
             await user.send(f"🚫 Sua reserva em **{date}** das **{start_time}** às **{end_time}** foi **RECUSADA**.")
             await channel.send(f"❌ Reserva de {user.mention} recusada por {interaction.user.mention}")
