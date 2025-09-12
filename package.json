@@ -1,0 +1,12 @@
+{
+  "name": "my-first-bot",
+  "version": "1.0.0",
+  "description": "Bot Discord rodando na Discloud",
+  "main": "main.py",
+  "scripts": {
+    "start": "python ./main.py"
+  },
+  "dependencies": {
+    "discord.js": "^14.16.3"
+  }
+}
