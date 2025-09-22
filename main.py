@@ -2,6 +2,7 @@ import os
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
+from loguru import logger
 
 load_dotenv()
 
@@ -22,7 +23,7 @@ bot = MyBot(command_prefix="!", intents=intents)
 
 @bot.event
 async def on_ready():
-    print(f"✅ Bot online as {bot.user}")
+    logger.info(f"✅ Bot online as {bot.user}")
 
 
 bot.run(TOKEN)

@@ -1,10 +1,11 @@
-from discord import Embed, ButtonStyle, Color, utils #, Forbidden
-from discord.ext import commands
-from discord.ui import Button, View
+from loguru import logger
 from datetime import datetime, timedelta
+from discord import Embed, ButtonStyle, Color, utils #, Forbidden
+from discord.ui import Button, View
+from discord.ext.commands import Cog, command
 
 
-class Calendar(commands.Cog):
+class Calendar(Cog):
     """Cog to handle reservation calendar and booking logic"""
 
     def __init__(self, bot):
@@ -14,7 +15,7 @@ class Calendar(commands.Cog):
         self.reservations = {}
 
     # ---------------- Command to open calendar ----------------
-    @commands.command(name='calendario')
+    @command(name='calendario')
     async def calendar(self, ctx):
         """Shows the next 7 days for the user to pick a date"""
         
@@ -134,8 +135,8 @@ class Calendar(commands.Cog):
         #         ephemeral=True)
         #     return
 
-        # print(f"✅ Reservation confirmed for {interaction.user.name} ({interaction.user.id}) on {date} from {start_time} to {end_time}")
-        # print(f"Global name: {interaction.user.global_name}")
+        # logger.info(f"✅ Reservation confirmed for {interaction.user.name} ({interaction.user.id}) on {date} from {start_time} to {end_time}")
+        # logger.info(f"Global name: {interaction.user.global_name}")
 
 
         # 🔹 Não salvar ainda como confirmada, apenas marcar como pendente
@@ -161,7 +162,7 @@ class Calendar(commands.Cog):
         channel = utils.get(self.bot.get_all_channels(), name="📝pending-approval")  
 
         if not channel:
-            print("❌ Canal 'pending-approval' não encontrado.")
+            logger.error("❌ Canal 'pending-approval' não encontrado.")
             return
 
         embed = Embed(
