@@ -9,6 +9,7 @@ from services.api_client import APIClient
 load_dotenv()
 
 TOKEN = os.environ['DISCORD_TOKEN']
+API_BASE_URL = os.environ["API_URL"]
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -20,7 +21,7 @@ class MyBot(commands.Bot):
 
 
 bot = MyBot(command_prefix="!", intents=intents)
-api = APIClient()
+api_client = APIClient(API_BASE_URL)
 
 
 @bot.event
@@ -28,7 +29,7 @@ async def on_ready():
     logger.info(f"✅ Bot online as {bot.user}")
     
     try:
-        info = await api.get_info()
+        info = await api_client.get_info()
         if info:
             logger.success(f"🌐 API respondeu com sucesso: {info}")
         else:

@@ -1,12 +1,9 @@
-from loguru import logger
 import aiohttp
-import os
 
-API_BASE_URL = os.getenv("API_URL", "http://localhost:8000")
 
 class APIClient:
-    def __init__(self):
-        self.base_url = API_BASE_URL
+    def __init__(self, api_url: str = "http://localhost:8000"):
+        self.base_url = api_url
 
     async def get_info(self):
         async with aiohttp.ClientSession() as session:
