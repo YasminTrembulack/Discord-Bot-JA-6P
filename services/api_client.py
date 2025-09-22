@@ -12,13 +12,9 @@ class APIClient:
         async with aiohttp.ClientSession() as session:
             async with session.get(f"{self.base_url}/") as resp:
                 if resp.status == 200:
-                    response = await resp.json()
-                    logger.info(f"Resposta da API: {response}")
-                    return response
+                    return await resp.json()
                 else:
-                    text = await resp.text()
-                    logger.error(f"Erro {resp.status} ao acessar {self.base_url}/ - {text}")
-                    return None
+                    return f"{resp.status} | {self.base_url}/ - {await resp.text()}"
     
     async def create_reservation(self, user_id, date, start, end):
         async with aiohttp.ClientSession() as session:
