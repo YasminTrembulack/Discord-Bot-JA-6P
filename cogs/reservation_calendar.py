@@ -32,10 +32,10 @@ class Calendar(Cog):
         buttons = View()
         # ____________________________________________________________________
         today = datetime.today()
-        next_days = [today + timedelta(days=i) for i in range(7)]
+        next_days = [(today + timedelta(days=i)).strftime("%d/%m/%Y") for i in range(7)]
         
         available_times = self.bot.api_client.get_available_times(days=next_days)
-        logger.warning(next_days)
+        
         # ____________________________________________________________________
         
         for i in range(7): # Next 7 days
