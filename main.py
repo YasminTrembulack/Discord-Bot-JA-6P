@@ -18,15 +18,15 @@ intents.members = True
 class MyBot(commands.Bot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.api = APIClient(API_BASE_URL)
+        self.api_client = APIClient(API_BASE_URL)
 
     async def setup_hook(self):
-        await self.api.start()  # 🔹 inicia a sessão
+        await self.api_client.start()  # 🔹 inicia a sessão
         await self.load_extension("cogs.reservation_calendar")
         await self.load_extension("cogs.events")
 
     async def close(self):
-        await self.api.close()  # 🔹 fecha a sessão antes de encerrar
+        await self.api_client.close()  # 🔹 fecha a sessão antes de encerrar
         await super().close()
 
 
