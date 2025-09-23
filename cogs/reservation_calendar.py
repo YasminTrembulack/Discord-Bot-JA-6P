@@ -1,3 +1,4 @@
+import itertools
 from loguru import logger
 from datetime import datetime, timedelta
 from discord import Embed, ButtonStyle, Color, utils
@@ -32,7 +33,11 @@ class Calendar(Cog):
         buttons = View()
         # ____________________________________________________________________
         today = datetime.today()
-        next_days = [(today + timedelta(days=i)).strftime("%d/%m/%Y") for i in range(1, 8)]
+        next_days = [
+            (today + timedelta(days=i)).strftime("%d/%m/%Y")
+            for i in itertools.count(1)
+            if (today + timedelta(days=i)).weekday() < 5
+        ][:7]
         
         available_times = await self.bot.api_client.get_available_times(days=next_days)
         
