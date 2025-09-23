@@ -34,7 +34,7 @@ class Calendar(Cog):
         today = datetime.today()
         next_days = [(today + timedelta(days=i)).strftime("%d/%m/%Y") for i in range(7)]
         
-        available_times = self.bot.api_client.get_available_times(days=next_days)
+        available_times = await self.bot.api_client.get_available_times(days=next_days)
         
         # ____________________________________________________________________
         
