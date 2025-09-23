@@ -24,14 +24,20 @@ class Calendar(Cog):
             await ctx.send("⚠️ Este comando só pode ser usado no canal 'reservations'.", delete_after=10)
             return
     
-        today = datetime.today()
         embed = Embed(
             title="📅 Calendário de Reservas",
             description="Escolha um dia para fazer uma reserva",
             color=Color.blue())
 
         buttons = View()
-
+        # ____________________________________________________________________
+        today = datetime.today()
+        next_days = [today + timedelta(days=i) for i in range(7)]
+        
+        available_times = self.bot.api_client.get_available_times(days=next_days)
+        logger.warning(next_days)
+        # ____________________________________________________________________
+        
         for i in range(7): # Next 7 days
             day = today + timedelta(days=i)
             date_str = day.strftime("%d/%m/%Y")

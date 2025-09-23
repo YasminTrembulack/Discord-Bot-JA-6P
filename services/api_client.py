@@ -1,3 +1,5 @@
+from datetime import datetime
+from typing import List
 import aiohttp
 from loguru import logger
 
@@ -36,8 +38,17 @@ class APIClient:
     async def update_reservation_status(self, reservation_id, status):
         ...
 
-    async def get_reservations(self, date: str):
+    async def get_available_times(self, days: List[datetime]):
+        """ 
+            Recebe no parametro uma lista de dias em datetime e manda para API
+            API vai recerber e mandar os horarios disponiveis nesses dias. Ex:
+            {
+                ''
+            }
+        """
         ...
+        
+
         
     async def register_user(self, user: User):
         # if not self.session:
