@@ -25,13 +25,12 @@ class Events(Cog):
     async def on_member_join(self, member: discord.Member):
         logger.info(f"👤 Novo membro entrou: {member.name} ({member.id})")
         try:
-            user = User(
-                id=member.id,
-                username=member.name,
-                global_name=member.global_name,
-                joined_at=member.joined_at,
-            )
-            await self.bot.api_client.register_user(user)
+            await self.bot.api_client.register_user(User(
+                member_id=member.id,
+                full_name=member.name,
+                username=member.global_name,
+                created_at=member.joined_at,
+            ))
         except Exception as e:
             logger.exception(f"❌ Erro ao registrar usuário na API: {e}")
 

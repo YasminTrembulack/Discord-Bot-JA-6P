@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from datetime import datetime
 
 class User(BaseModel):
-    id: int
+    member_id: int
     username: str
-    global_name: str | None = None
-    joined_at: datetime
+    full_name: str
+    created_at: datetime
