@@ -2,7 +2,6 @@ import os
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
-from loguru import logger
 
 from services.api_client import APIClient
 
@@ -13,32 +12,23 @@ API_BASE_URL = os.environ["API_URL"]
 
 intents = discord.Intents.default()
 intents.message_content = True
+intents.members = True
 
 
 class MyBot(commands.Bot):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.api = APIClient(API_BASE_URL)
+
     async def setup_hook(self):
+        await self.api.start()  # 🔹 inicia a sessão
         await self.load_extension("cogs.reservation_calendar")
+        await self.load_extension("cogs.events")
+
+    async def close(self):
+        await self.api.close()  # 🔹 fecha a sessão antes de encerrar
+        await super().close()
 
 
 bot = MyBot(command_prefix="!", intents=intents)
-api_client = APIClient(API_BASE_URL)
-
-
-@bot.event
-async def on_ready():
-    logger.info(f"✅ Bot online as {bot.user}")
-    
-    try:
-        info = await api_client.get_info()
-        if info:
-            logger.success(f"🌐 API respondeu com sucesso: {info}")
-        else:
-            logger.warning("⚠️ API não retornou dados válidos.")
-    except Exception as e:
-        logger.exception(f"❌ Erro ao chamar a API: {e}")
-
-
 bot.run(TOKEN)
-
-# https://discloud.com/
-# https://squarecloud.app/pt-br/home
