@@ -46,10 +46,7 @@ class Calendar(Cog):
         
         # ____________________________________________________________________
         
-        for i in range(7): # Next 7 days
-            day = today + timedelta(days=i)
-            date_str = day.strftime("%d/%m/%Y")
-
+        for date_str in next_days: # Next 7 days
             button = Button(label=date_str, style=ButtonStyle.green)
 
             async def callback(interaction, date=date_str):
