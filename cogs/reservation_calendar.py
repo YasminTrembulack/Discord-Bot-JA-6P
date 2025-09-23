@@ -1,6 +1,6 @@
 from loguru import logger
 from datetime import datetime, timedelta
-from discord import Embed, ButtonStyle, Color, utils #, Forbidden
+from discord import Embed, ButtonStyle, Color, utils
 from discord.ui import Button, View
 from discord.ext.commands import Cog, command
 
@@ -26,13 +26,13 @@ class Calendar(Cog):
     
         today = datetime.today()
         embed = Embed(
-            title="📅 Reservation Calendar",
-            description="Choose a day to make a reservation",
+            title="📅 Calendário de Reservas",
+            description="Escolha um dia para fazer uma reserva",
             color=Color.blue())
 
         buttons = View()
 
-        for i in range(7):
+        for i in range(7): # Next 7 days
             day = today + timedelta(days=i)
             date_str = day.strftime("%d/%m/%Y")
 
@@ -49,8 +49,8 @@ class Calendar(Cog):
     # ---------------- Show times for a selected day ----------------
     async def show_times(self, interaction, date):
         embed = Embed(
-            title=f"⏰ Choose starting time on {date}",
-            description="Then choose the ending time",
+            title=f"⏰ Escolha o horário de início em {date}",
+            description="Depois escolha o horário de término",
             color=Color.green())
 
         buttons = View()
@@ -60,7 +60,7 @@ class Calendar(Cog):
 
             # Already reserved -> red button disabled
             if date in self.reservations and time_slot in self.reservations[date]:
-                button = Button( label=time_slot, style=ButtonStyle.red, disabled=True)
+                button = Button(label=time_slot, style=ButtonStyle.red, disabled=True)
             else:
                 button = Button(label=time_slot, style=ButtonStyle.blurple)
 
@@ -76,8 +76,8 @@ class Calendar(Cog):
     # ---------------- Choose ending time ----------------
     async def choose_end(self, interaction, date, start_time):
         embed = Embed(
-            title=f"📌 Reserve on {date}",
-            description=f"Start: {start_time}\nNow choose the ending time:",
+            title=f"📌 Reserva em {date}",
+            description=f"Início: {start_time}\nAgora escolha o horário de término:",
             color=Color.purple())
 
         buttons = View()
@@ -115,29 +115,11 @@ class Calendar(Cog):
         ]
         if conflicts:
             await interaction.response.send_message(
-                f"❌ There are already reservations at {', '.join(conflicts)} on {date}.",
+                f"❌ Já existem reservas às {', '.join(conflicts)} em {date}.",
                 ephemeral=True)
             return
 
-
-        # # Save reservations by user ID
-        # for h in range(start_hour, end_hour):
-        #     self.reservations[date][f"{h:02d}:00"] = interaction.user.id
-
-        # # Send DM confirmation
-        # try:
-        #     await interaction.user.send(
-        #         f"✅ Your reservation on **{date}** from **{start_time}** to **{end_time}** has been confirmed!"
-        #     )
-        # except Forbidden:
-        #     await interaction.response.send_message(
-        #         f"⚠️ {interaction.user.mention}, I couldn’t send you a DM. Please enable DMs to receive confirmations.",
-        #         ephemeral=True)
-        #     return
-
-        # logger.info(f"✅ Reservation confirmed for {interaction.user.name} ({interaction.user.id}) on {date} from {start_time} to {end_time}")
-        # logger.info(f"Global name: {interaction.user.global_name}")
-
+        logger.info(f"⏰ Reserva realizada por {interaction.user.name} ({interaction.user.id}) em {date} das {start_time} até {end_time}")
 
         # 🔹 Não salvar ainda como confirmada, apenas marcar como pendente
         self.reservations[date][f"{start_hour:02d}:00-{end_hour:02d}:00"] = {
