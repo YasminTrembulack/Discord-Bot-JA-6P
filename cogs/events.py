@@ -25,8 +25,9 @@ class Events(Cog):
     async def on_member_join(self, member: discord.Member):
         logger.info(f"👤 Novo membro entrou: {member.name} ({member.id})")
         try:
-            await self.bot.api_client.register_user(User(
-                member_id=member.id,
+            await self.bot.api_client.register_user(
+            User(
+                member_id=str(member.id),
                 full_name=member.name,
                 username=member.global_name,
                 created_at=member.joined_at,
