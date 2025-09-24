@@ -96,29 +96,32 @@ class Calendar(Cog):
         buttons = View()
         start_index = times.index(start_time)
 
-        # percorre apenas os horários que vêm depois do horário inicial
-        for end_time in times[start_index + 1:]:
-            end_index = times.index(end_time)
+        # começa depois do horário inicial
+        possible_ends = []
 
-            # checa se todos os horários intermediários estão disponíveis
-            interval = times[start_index:end_index + 1]
-            conflict = any(t not in times for t in interval)  # aqui deve dar sempre False
-            # ou, se você já tem reservas armazenadas, verifica nelas:
-            conflict = any(t in self.reservations.get(date, {}) for t in interval)
+        for i in range(start_index + 1, len(times)):
+            # hora anterior ao horário de término
+            prev_time = times[i - 1]
+            current_time = times[i]
 
-            if conflict:
-                button = Button(label=end_time, style=ButtonStyle.red, disabled=True)
+            # se o horário atual está nos disponíveis, adiciona
+            if current_time in times:
+                possible_ends.append(current_time)
             else:
-                button = Button(label=end_time, style=ButtonStyle.green)
+                # se encontrou um buraco, para a sequência
+                break
 
-                async def callback(interaction, d=date, i=start_time, f=end_time):
-                    await self.reserve_slot(interaction, d, i, f)
+        # cria botões
+        for end_time in possible_ends:
+            button = Button(label=end_time, style=ButtonStyle.green)
 
-                button.callback = callback
+            async def callback(interaction, d=date, i=start_time, f=end_time):
+                await self.reserve_slot(interaction, d, i, f)
 
+            button.callback = callback
             buttons.add_item(button)
 
-        await interaction.response.send_message(embed=embed, view=buttons, ephemeral=True)  
+        await interaction.response.send_message(embed=embed, view=buttons, ephemeral=True)
 
     # ---------------- Reserve the slot ----------------
     async def reserve_slot(self, interaction, date, start_time, end_time):
