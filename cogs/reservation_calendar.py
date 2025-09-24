@@ -1,4 +1,3 @@
-import itertools
 from loguru import logger
 from datetime import datetime, timedelta
 from discord import Embed, ButtonStyle, Color, utils
@@ -42,15 +41,18 @@ class Calendar(Cog):
                 next_days.append(day.strftime("%d/%m/%Y"))
             delta += 1
         
-        available_times = await self.bot.api_client.get_available_times(days=next_days)
+        times_by_date = await self.bot.api_client.get_available_times(days=next_days)
         
         # ____________________________________________________________________
         
-        for date_str in next_days: # Next 7 days
-            button = Button(label=date_str, style=ButtonStyle.green)
-
-            async def callback(interaction, date=date_str):
-                await self.show_times(interaction, date)
+        for date_str in next_days:
+            avaliable_times = times_by_date.get(date_str)
+            if len(avaliable_times) > 0:
+                button = Button(label=date_str, style=ButtonStyle.green)
+            else:
+                button = Button(label=date_str, style=ButtonStyle.red, disabled=True)
+            async def callback(interaction, date=date_str, times=avaliable_times):
+                await self.show_times(interaction, date, times)
 
             button.callback = callback
             buttons.add_item(button)
@@ -58,7 +60,7 @@ class Calendar(Cog):
         await ctx.send(embed=embed, view=buttons)
 
     # ---------------- Show times for a selected day ----------------
-    async def show_times(self, interaction, date):
+    async def show_times(self, interaction, date, times):
         embed = Embed(
             title=f"⏰ Escolha o horário de início em {date}",
             description="Depois escolha o horário de término",
@@ -66,8 +68,8 @@ class Calendar(Cog):
 
         buttons = View()
 
-        for hour in range(8, 21):
-            time_slot = f"{hour:02d}:00"
+        for time_slot in times: # range(8, 21)
+            # time_slot = f"{hour:02d}:00"
 
             # Already reserved -> red button disabled
             if date in self.reservations and time_slot in self.reservations[date]:
@@ -75,8 +77,8 @@ class Calendar(Cog):
             else:
                 button = Button(label=time_slot, style=ButtonStyle.blurple)
 
-                async def callback(interaction, h=time_slot, d=date):
-                    await self.choose_end(interaction, d, h)
+                async def callback(interaction, h=time_slot, d=date, t=times):
+                    await self.choose_end(interaction, d, h, t)
 
                 button.callback = callback
 
@@ -85,21 +87,27 @@ class Calendar(Cog):
         await interaction.response.send_message(embed=embed, view=buttons, ephemeral=True)
 
     # ---------------- Choose ending time ----------------
-    async def choose_end(self, interaction, date, start_time):
+    async def choose_end(self, interaction, date, start_time, times):
         embed = Embed(
             title=f"📌 Reserva em {date}",
             description=f"Início: {start_time}\nAgora escolha o horário de término:",
             color=Color.purple())
 
         buttons = View()
-        start_hour = int(start_time.split(":")[0])
+        start_index = times.index(start_time)
 
-        for hour in range(start_hour + 1, 22):
-            end_time = f"{hour:02d}:00"
-            conflict = any(f"{h:02d}:00" in self.reservations.get(date, {}) for h in range(start_hour, hour))
+        # percorre apenas os horários que vêm depois do horário inicial
+        for end_time in times[start_index + 1:]:
+            end_index = times.index(end_time)
+
+            # checa se todos os horários intermediários estão disponíveis
+            interval = times[start_index:end_index + 1]
+            conflict = any(t not in times for t in interval)  # aqui deve dar sempre False
+            # ou, se você já tem reservas armazenadas, verifica nelas:
+            conflict = any(t in self.reservations.get(date, {}) for t in interval)
 
             if conflict:
-                button = Button( label=end_time, style=ButtonStyle.red, isabled=True)
+                button = Button(label=end_time, style=ButtonStyle.red, disabled=True)
             else:
                 button = Button(label=end_time, style=ButtonStyle.green)
 
@@ -110,7 +118,7 @@ class Calendar(Cog):
 
             buttons.add_item(button)
 
-        await interaction.response.send_message(embed=embed, view=buttons, ephemeral=True)
+        await interaction.response.send_message(embed=embed, view=buttons, ephemeral=True)  
 
     # ---------------- Reserve the slot ----------------
     async def reserve_slot(self, interaction, date, start_time, end_time):

@@ -1,8 +1,9 @@
-from typing import List
+import random
 import aiohttp
+from typing import List
 from loguru import logger
-
 from services.models import User
+from datetime import datetime, timedelta
 
 class APIClient:
     def __init__(self, base_url: str):
@@ -40,16 +41,18 @@ class APIClient:
     async def get_available_times(self, days: List[str]):
         """ 
             Recebe no parametro uma lista de dias em datetime e manda para API
-            API vai recerber e mandar os horarios disponiveis nesses dias. Ex:
-            {
-                ''
+            API vai recerber e mandar os horarios disponiveis nesses dias.
+            Exemplo: {
+                "24/09/2025": ["08:00", "09:00", "20:00"], 
+                "25/09/2025": ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"]
             }
         """
         logger.warning(days)
-        
-        
+        horarios = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"]
+        mock_repsonse = { day: random.sample(horarios, 5) for day in days }
+        mock_repsonse[days[0]] = []
+        return mock_repsonse
 
-        
     async def register_user(self, user: User):
         # if not self.session:
         #     raise RuntimeError("APIClient não iniciado. Chame start() antes.")
