@@ -1,7 +1,9 @@
-import discord
 from loguru import logger
-from services.models import User
+
+import discord
 from discord.ext.commands import Cog
+
+from services.models import UserPayload
 
 
 class Events(Cog):
@@ -25,8 +27,8 @@ class Events(Cog):
     async def on_member_join(self, member: discord.Member):
         logger.info(f"👤 Novo membro entrou: {member.name} ({member.id})")
         try:
-            await self.bot.api_client.register_user(
-            User(
+            await self.bot.api_client.create_user(
+            UserPayload(
                 member_id=str(member.id),
                 full_name=member.name,
                 username=member.global_name,

@@ -22,7 +22,7 @@ class MyBot(commands.Bot):
 
     async def setup_hook(self):
         await self.api_client.start()  # 🔹 inicia a sessão
-        await self.load_extension("cogs.reservation_calendar")
+        await self.load_extension("cogs.reservation_manager")
         await self.load_extension("cogs.events")
 
     async def close(self):
