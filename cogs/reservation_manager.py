@@ -252,8 +252,8 @@ class ReservationManager(Cog):
                 interaction, 
                 status="approved",
                 emoji="✅", 
-                user_msg="🎉 Reserva de {user} aprovada por {approver} **APROVADA**!", 
-                channel_msg=f"✅ {base_channel_msg}" ) 
+                user_msg=f"🎉 {base_user_msg} **APROVADA**!", 
+                channel_msg="✅ Reserva de {user} aprovada por {approver}" ) 
         approve_btn.callback = approve_callback 
         
         # Botão Recusar 
@@ -263,8 +263,8 @@ class ReservationManager(Cog):
                 interaction,
                 status="rejected",
                 emoji="❌", 
-                user_msg="🚫 Reserva de {user} aprovada por {approver} **RECUSADA**.", 
-                channel_msg="❌ {base_channel_msg}" ) 
+                user_msg=f"🚫 {base_user_msg} **RECUSADA**.", 
+                channel_msg="❌ Reserva de {user} aprovada por {approver}" ) 
         reject_btn.callback = reject_callback 
         
         view.add_item(approve_btn) 
