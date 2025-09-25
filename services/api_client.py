@@ -41,11 +41,11 @@ class APIClient:
             else:
                 return f"{resp.status} | {self.base_url}/ - {await resp.text()}"
     
-    async def create_reservation(self, user_id, date, start, end, status, equipment_id) -> uuid.UUID:
-        logger.info(f"⏰ Reserva realizada por {user_id} para a {equipment_id} em {date} das {start} até {end} - Status: {status}")
+    async def create_reservation(self, user_id, date, start, end, status, equipment_id, responsible_id = None) -> uuid.UUID:
+        logger.info(f"⏰ Reserva realizada por {user_id} para a {equipment_id} em {date} das {start} até {end} - Status: {status}, Responsavel: {responsible_id}")
         return uuid.uuid4() # deve retor o id da reserva criada
 
-    async def update_reservation_status(self, reservation_id, status):
+    async def update_reservation_status_responsible(self, reservation_id, status, responsible_id):
         logger.info(f"Status da reserva {reservation_id} atualizada. Status: {status}")
 
     async def get_unavailable_times_by_equipment(self, days: List[str], equipment_id):

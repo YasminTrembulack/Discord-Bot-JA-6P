@@ -225,7 +225,12 @@ class ReservationManager(Cog):
                 await interaction.response.send_message("⚠️ Você não tem permissão para aprovar ou recusar reservas.", ephemeral=True)
                 return
 
-            await self.api_client.update_reservation_status(state.reservation_id, status)
+            responsible: UserResponse = await self.api_client.get_user(
+                member_id=str(interaction.user.id), 
+                full_name=interaction.user.name, 
+                username=interaction.user.global_name)
+
+            await self.api_client.update_reservation_status_responsible(state.reservation_id, status, responsible.id)
             async with state.lock:
                 del self.user_states[user.id]
 
