@@ -244,7 +244,7 @@ class ReservationManager(Cog):
             await interaction.response.send_message(response_msg, ephemeral=True)
 
         base_user_msg = f"Sua reserva em **{state.date}** das **{state.start_time}** às **{state.end_time}** foi"
-        base_channel_msg = "Reserva de {user} aprovada por {approver}"
+        base_channel_msg = 
         
         # Botão Aprovar 
         approve_btn = Button(label="Aprovar ✅", style=ButtonStyle.green) 
@@ -253,7 +253,7 @@ class ReservationManager(Cog):
                 interaction, 
                 status="approved",
                 emoji="✅", 
-                user_msg=f"🎉 {base_user_msg} **APROVADA**!", 
+                user_msg="🎉 Reserva de {user} aprovada por {approver} **APROVADA**!", 
                 channel_msg=f"✅ {base_channel_msg}" ) 
         approve_btn.callback = approve_callback 
         
@@ -264,7 +264,7 @@ class ReservationManager(Cog):
                 interaction,
                 status="rejected",
                 emoji="❌", 
-                user_msg=f"🚫 {base_user_msg} **RECUSADA**.", 
+                user_msg="🚫 Reserva de {user} aprovada por {approver} **RECUSADA**.", 
                 channel_msg="❌ {base_channel_msg}" ) 
         reject_btn.callback = reject_callback 
         
