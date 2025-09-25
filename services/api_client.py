@@ -46,7 +46,7 @@ class APIClient:
         return uuid.uuid4() # deve retor o id da reserva criada
 
     async def update_reservation_status_responsible(self, reservation_id, status, responsible_id):
-        logger.info(f"Status da reserva {reservation_id} atualizada. Status: {status}")
+        logger.info(f"Status da reserva {reservation_id} atualizada. Status: {status}, Responsavel: {responsible_id}")
 
     async def get_unavailable_times_by_equipment(self, days: List[str], equipment_id):
         """ 
