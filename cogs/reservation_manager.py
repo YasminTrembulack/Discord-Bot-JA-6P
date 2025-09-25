@@ -244,7 +244,6 @@ class ReservationManager(Cog):
             await interaction.response.send_message(response_msg, ephemeral=True)
 
         base_user_msg = f"Sua reserva em **{state.date}** das **{state.start_time}** às **{state.end_time}** foi"
-        base_channel_msg = 
         
         # Botão Aprovar 
         approve_btn = Button(label="Aprovar ✅", style=ButtonStyle.green) 
