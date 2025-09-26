@@ -3,8 +3,8 @@ from loguru import logger
 from discord import Member
 from discord.ext.commands import Cog, Bot
 
+from models.user import UserPayload
 from services.api_client import APIClient
-from services.models import UserPayload
 
 
 class Events(Cog):

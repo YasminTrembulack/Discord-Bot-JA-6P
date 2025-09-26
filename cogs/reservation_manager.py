@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict
+from typing import Dict, List
 
 from loguru import logger
 
@@ -7,8 +7,11 @@ from discord import ButtonStyle, Color, Embed, Forbidden, utils
 from discord.ext.commands import Bot, Cog, command
 from discord.ui import Button, View
 
+from models.equipment import EquipmentResponse
+from models.reservation import ReservationConfig, ReservationPayload, UserReservationState
+from models.user import UserPayload, UserResponse
 from services.api_client import APIClient
-from services.models import ReservationConfig, UserReservationState, UserResponse
+
 from utils.datetime_utils import (
     generate_next_days,
     generate_possible_end_times,
@@ -16,6 +19,7 @@ from utils.datetime_utils import (
     get_available_times,
 )
 from views.buttons import DateButton, EquipmentButton, TimeButton
+
 
 
 class ReservationManager(Cog):
@@ -45,7 +49,7 @@ class ReservationManager(Cog):
             color=Color.blue())
 
         view = View()
-        equipments = await self.api_client.get_equipments()
+        equipments: List[EquipmentResponse] = await self.api_client.get_equipments()
 
         for equipment in equipments:
             async def on_click(interaction, e=equipment):
@@ -168,24 +172,26 @@ class ReservationManager(Cog):
     async def reserve_slot(self, interaction):
         state = self.user_states[interaction.user.id]
 
-        user: UserResponse = await self.api_client.get_user(
+        user: UserResponse = await self.api_client.get_user(UserPayload(
             member_id=str(interaction.user.id), 
-            full_name=interaction.user.name, 
-            username=interaction.user.global_name)
+            username=interaction.user.global_name))
+        
+        start_datetime = datetime.strptime(state.start_time, "%H:%M").time()
+        end_datetime = datetime.strptime(state.end_time, "%H:%M").time()
+        date = datetime.strptime(state.date, "%d/%m/%y").date()
 
-        reservation_id = await self.api_client.create_reservation(
+        reservation = await self.api_client.create_reservation(ReservationPayload(
             status="pending" if self.config.reservation_approval_chanel else "approved",
+            start=datetime.combine(date, start_datetime),
+            end=datetime.combine(date, end_datetime),
             equipment_id=state.equipment_id,
-            start=state.start_time, 
-            end=state.end_time, 
-            user_id=user.id, 
-            date=state.date,)
+            user_id=user.id,
+        ))
     
-        state.reservation_id = reservation_id
+        state.reservation = reservation
 
         if not self.config.reservation_approval_chanel:
-            dm_sent = await self.send_user_dm(
-                interaction.user,
+            dm_sent = await self.send_user_dm(interaction.user,
                 f"✅ Sua reserva no dia **{state.date}** das **{state.start_time}** até **{state.end_time}** foi confirmada!")
 
             msg = "✅ Reserva confirmada! (cheque sua DM 👀)" if dm_sent else \
@@ -225,12 +231,13 @@ class ReservationManager(Cog):
                 await interaction.response.send_message("⚠️ Você não tem permissão para aprovar ou recusar reservas.", ephemeral=True)
                 return
 
-            responsible: UserResponse = await self.api_client.get_user(
+            responsible: UserResponse = await self.api_client.get_user(UserPayload(
                 member_id=str(interaction.user.id), 
-                full_name=interaction.user.name, 
-                username=interaction.user.global_name)
-
-            await self.api_client.update_reservation_status_responsible(state.reservation_id, status, responsible.id)
+                username=interaction.user.global_name))
+            
+            state.reservation.status = status
+            state.reservation.responsible_id = responsible.id
+            await self.api_client.update_reservation(state.reservation)
             async with state.lock:
                 del self.user_states[user.id]
 

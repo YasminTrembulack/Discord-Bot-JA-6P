@@ -1,4 +1,6 @@
 import os
+from cogs.reservation_manager import ReservationManager
+from cogs.events import Events
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
@@ -19,18 +21,23 @@ intents.members = True
 class MyBot(commands.Bot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.api_client = APIClient(API_BASE_URL)
-        self.user_service = UserService(self.api_client)
+        self._api_client = APIClient(API_BASE_URL)
+        self.user_service = UserService(self._api_client)
 
     async def setup_hook(self):
-        await self.api_client.start()  # 🔹 inicia a sessão
-        await self.load_extension("cogs.reservation_manager")
-        await self.load_extension("cogs.events")
+        await self._api_client.start()
+        
+        await self.add_cog(ReservationManager(self, self.user_service))
+        await self.add_cog(Events(self))
 
     async def close(self):
-        await self.api_client.close()  # 🔹 fecha a sessão antes de encerrar
+        await self._api_client.close()
         await super().close()
 
 
 bot = MyBot(command_prefix="!", intents=intents)
 bot.run(TOKEN)
+
+@commands.command()
+async def ping(self, ctx):
+    await ctx.send("pong 🏓")

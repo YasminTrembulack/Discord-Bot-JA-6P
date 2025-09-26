@@ -1,9 +1,8 @@
-# services/api_client/user.py
-import uuid
+from uuid import UUID, uuid4
 from datetime import datetime, timezone
 from loguru import logger
+from models.user import UserPayload, UserResponse
 from services.api_client import APIClient
-from services.models import UserPayload, UserResponse
 
 class UserService:
     def __init__(self, client: APIClient):
@@ -21,7 +20,7 @@ class UserService:
         # Mock para testes:
         now = datetime.now(timezone.utc)
         return UserResponse(
-            id=uuid.uuid4(),
+            id=uuid4(),
             member_id=user.member_id,
             username=user.username,
             full_name=user.full_name,
@@ -42,7 +41,7 @@ class UserService:
         # Mock para testes:
         now = datetime.now(timezone.utc)
         return UserResponse(
-            id=uuid.uuid4(),
+            id=uuid4(),
             member_id=member_id,
             username=username,
             full_name=full_name,
@@ -51,7 +50,7 @@ class UserService:
             deleted_at=None
         )
 
-    async def update_user(self, user_id: uuid.UUID, payload: dict) -> UserResponse:
+    async def update_user(self, user_id: UUID, payload: dict) -> UserResponse:
         """
         Atualiza dados de um usuário existente.
         """
@@ -64,9 +63,9 @@ class UserService:
         now = datetime.now(timezone.utc)
         return UserResponse(
             id=user_id,
-            member_id=payload.get("member_id", "unknown"),
-            username=payload.get("username", "unknown"),
-            full_name=payload.get("full_name", "unknown"),
+            member_id=payload.get("member_id", None),
+            username=payload.get("username", None),
+            full_name=payload.get("full_name", None),
             created_at=now,
             updated_at=now,
             deleted_at=None
