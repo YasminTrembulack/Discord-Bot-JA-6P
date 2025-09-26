@@ -179,7 +179,7 @@ class ReservationManager(Cog):
         
         start_datetime = datetime.strptime(state.start_time, "%H:%M").time()
         end_datetime = datetime.strptime(state.end_time, "%H:%M").time()
-        date = datetime.strptime(state.date, "%d/%m/%y").date()
+        date = datetime.strptime(state.date, "%d/%m/%Y").date()
 
         reservation = await self.reservation_service.create_reservation(
             ReservationPayload(
