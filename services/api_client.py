@@ -7,7 +7,6 @@ class APIClient:
     def __init__(self, base_url: str):
         self.base_url = base_url.rstrip("/")
         self.session: aiohttp.ClientSession | None = None
-        self.proxy = os.environ.get('PROXY_URL')
 
     async def start(self):
         if not self.session:
@@ -43,7 +42,7 @@ class APIClient:
 
         url = f"{self.base_url}/{endpoint.lstrip('/')}"
         try:
-            async with self.session.request(method, url, proxy=self.proxy, **kwargs) as resp:
+            async with self.session.request(method, url, **kwargs) as resp:
                 try:
                     resp.raise_for_status()
                 except aiohttp.ClientResponseError as e:
