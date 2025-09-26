@@ -7,7 +7,7 @@ from models.user import UserPayload
 from services.api_client import APIClient
 
 
-class Events(Cog):
+class EventsManager(Cog):
     bot: Bot
     _api_client: APIClient
 

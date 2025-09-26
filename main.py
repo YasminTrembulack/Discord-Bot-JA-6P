@@ -3,7 +3,7 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 
-from cogs.events import Events
+from cogs.events_manager import EventsManager
 from cogs.reservation_manager import ReservationManager
 from services.api_client import APIClient
 from services.equipment_service import EquipmentService
@@ -31,7 +31,7 @@ class MyBot(commands.Bot):
     async def setup_hook(self):
         await self._api_client.start()
         
-        await self.add_cog(Events(self))
+        await self.add_cog(EventsManager(self))
         await self.add_cog(ReservationManager(
             self, self.user_service, self.reservation_service, self.equipment_service))
 

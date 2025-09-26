@@ -4,7 +4,7 @@ from typing import Dict, List
 from loguru import logger
 
 from discord import ButtonStyle, Color, Embed, Forbidden, utils
-from discord.ext.commands import Bot, Cog, command
+from discord.ext.commands import Bot, Cog, command, Context
 from discord.ui import Button, View
 
 from models.equipment import EquipmentResponse
@@ -37,7 +37,7 @@ class ReservationManager(Cog):
 
     # ---------------- Command to open ReservationManager ----------------
     @command(name='reservar')
-    async def show_equipment(self, ctx):
+    async def show_equipment(self, ctx: Context):
         self.config = await self.reservation_service.get_reservation_config()
 
         reservation_chanel = self.config.reservation_chanel
@@ -68,7 +68,7 @@ class ReservationManager(Cog):
 
             view.add_item(EquipmentButton(equipment, on_click))
 
-        await ctx.send(embed=embed, view=view)
+        await ctx.send(embed=embed, view=view, ephemeral=True)
 
     # ---------------- Show calendar ----------------
     async def show_available_dates(self, interaction):
