@@ -46,11 +46,11 @@ class BotConfig(BaseModel):
     admin_roles: List[str] = Field(default_factory=list, description="IDs de roles de Admin do servidor")
     approver_roles: List[str] = Field(default_factory=list, description="IDs de roles que podem aprovar reservas")
     
-    @field_validator('end_time')
+    @field_validator('closing_time')
     def check_time_order(cls, v, info):
-        start_time = info.data.get('start_time')
-        if start_time and v <= start_time:
-            raise ValueError('end_time deve ser maior que start_time')
+        opening_time = info.data.get('opening_time')
+        if opening_time and v <= opening_time:
+            raise ValueError('closing_time deve ser maior que opening_time')
         return v
 
     @field_validator('days_of_week')
