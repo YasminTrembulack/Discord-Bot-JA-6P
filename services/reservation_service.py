@@ -13,7 +13,7 @@ class ReservationService:
     async def get_reservation_config(self):
         data = {
             "reservation_chanel": "📅reservations", # "📅reservations"
-            "reservation_approval_chanel": "📝pending-approval", # "📝pending-approval"
+            "reservation_approval_chanel": None, # "📝pending-approval"
             "start_time": "08:00",
             "end_time": "21:00",
             "max_reservation_blocks": 2,
