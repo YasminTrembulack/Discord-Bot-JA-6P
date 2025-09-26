@@ -3,8 +3,8 @@ import random
 from typing import List
 from uuid import UUID, uuid4
 from loguru import logger
+from models.reservation import ReservationConfig, ReservationPayload, ReservationResponse
 from services.api_client import APIClient
-from types.models import ReservationConfig, ReservationPayload, ReservationResponse
 
 class ReservationService:
     def __init__(self, client: APIClient):

@@ -1,9 +1,8 @@
 from typing import List
-from uuid import UUID, uuid4
+from uuid import uuid4
 from datetime import datetime, timezone
-from loguru import logger
+from models.equipment import EquipmentResponse
 from services.api_client import APIClient
-from types.models import EquipmentPayload, EquipmentResponse
 
 class EquipmentService:
     def __init__(self, client: APIClient):
