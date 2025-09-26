@@ -12,31 +12,34 @@ from models.reservation import ReservationConfig, ReservationPayload, UserReserv
 from models.user import UserPayload, UserResponse
 from services.api_client import APIClient
 
+from services.equipment_service import EquipmentService
+from services.reservation_service import ReservationService
+from services.user_service import UserService
 from utils.datetime_utils import (
     generate_next_days,
     generate_possible_end_times,
     generate_time_slots,
-    get_available_times,
+    get_available_time_slots,
 )
 from views.buttons import DateButton, EquipmentButton, TimeButton
 
 
 
 class ReservationManager(Cog):
-    bot: Bot
     config: ReservationConfig
     user_states: Dict[int, UserReservationState]
-    api_client: APIClient
 
-    def __init__(self, bot):
-        self.bot = bot
+    def __init__(self, bot, user_service, reservation_service, equipment_service):
+        self.reservation_service: ReservationService = reservation_service        
+        self.equipment_service: EquipmentService = equipment_service        
+        self.user_service: UserService = user_service        
         self.user_states = {}
-        self.api_client = bot.api_client        
+        self.bot: Bot = bot
 
     # ---------------- Command to open ReservationManager ----------------
     @command(name='reservar')
     async def show_equipment(self, ctx):
-        self.config = await self.api_client.get_reservation_config()
+        self.config = await self.reservation_service.get_reservation_config()
 
         reservation_chanel = self.config.reservation_chanel
         if reservation_chanel and ctx.channel.name != reservation_chanel:
@@ -49,7 +52,7 @@ class ReservationManager(Cog):
             color=Color.blue())
 
         view = View()
-        equipments: List[EquipmentResponse] = await self.api_client.get_equipments()
+        equipments: List[EquipmentResponse] = await self.equipment_service.get_equipments()
 
         for equipment in equipments:
             async def on_click(interaction, e=equipment):
@@ -86,27 +89,26 @@ class ReservationManager(Cog):
             start=datetime.today(),
         )
 
-        unavailable_times_by_date = (
-            await self.api_client.get_unavailable_times_by_equipment(
-                next_days, state.equipment_id))
+        unavailable_time_slots_by_date = (
+            await self.reservation_service.fetch_unavailable_slots(next_days, state.equipment_id))
 
         for date_str in next_days:
-            unavailable_times = unavailable_times_by_date.get(date_str, [])
+            unavailable_time_slots = unavailable_time_slots_by_date.get(date_str, [])
 
-            available_times = get_available_times(
+            available_time_slots = get_available_time_slots(
                 start_time=datetime.strptime(self.config.start_time.strftime("%H:%M"), "%H:%M"),
                 end_time=datetime.strptime(self.config.end_time.strftime("%H:%M"), "%H:%M"),
                 interval=self.config.min_reservation,
-                unavailable_times=unavailable_times,)
+                unavailable_time_slots=unavailable_time_slots,)
 
-            async def on_click(interaction, d=date_str, u=unavailable_times):
+            async def on_click(interaction, d=date_str, u=unavailable_time_slots):
                 state = self.user_states[interaction.user.id]
                 async with state.lock:
-                    state.unavailable_times = u
+                    state.unavailable_time_slots = u
                     state.date = d
                 await self.show_available_times(interaction)
 
-            view.add_item(DateButton(date_str, available_times, on_click))
+            view.add_item(DateButton(date_str, available_time_slots, on_click))
 
         await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
@@ -127,7 +129,7 @@ class ReservationManager(Cog):
             interval=self.config.min_reservation,)
 
         for time_str in time_slots:
-            available = time_str not in state.unavailable_times
+            available = time_str not in state.unavailable_time_slots
     
             async def on_click(interaction, t=time_str):
                 state = self.user_states[interaction.user.id]
@@ -154,7 +156,7 @@ class ReservationManager(Cog):
             end_time=datetime.strptime(self.config.end_time.strftime("%H:%M"), "%H:%M"),
             current=datetime.strptime(state.start_time, "%H:%M"),
             blocks=self.config.max_reservation_blocks,
-            unavailable_times=state.unavailable_times,
+            unavailable_time_slots=state.unavailable_time_slots,
             interval=self.config.min_reservation,)
 
         for t_end in possible_ends:
@@ -172,7 +174,7 @@ class ReservationManager(Cog):
     async def reserve_slot(self, interaction):
         state = self.user_states[interaction.user.id]
 
-        user: UserResponse = await self.api_client.get_user(UserPayload(
+        user: UserResponse = await self.user_service.get_user(UserPayload(
             member_id=str(interaction.user.id), 
             username=interaction.user.global_name))
         
@@ -180,13 +182,13 @@ class ReservationManager(Cog):
         end_datetime = datetime.strptime(state.end_time, "%H:%M").time()
         date = datetime.strptime(state.date, "%d/%m/%y").date()
 
-        reservation = await self.api_client.create_reservation(ReservationPayload(
-            status="pending" if self.config.reservation_approval_chanel else "approved",
-            start=datetime.combine(date, start_datetime),
-            end=datetime.combine(date, end_datetime),
-            equipment_id=state.equipment_id,
-            user_id=user.id,
-        ))
+        reservation = await self.reservation_service.create_reservation(
+            ReservationPayload(
+                status="pending" if self.config.reservation_approval_chanel else "approved",
+                start=datetime.combine(date, start_datetime),
+                end=datetime.combine(date, end_datetime),
+                equipment_id=state.equipment_id,
+                user_id=user.id,))
     
         state.reservation = reservation
 
@@ -231,13 +233,14 @@ class ReservationManager(Cog):
                 await interaction.response.send_message("⚠️ Você não tem permissão para aprovar ou recusar reservas.", ephemeral=True)
                 return
 
-            responsible: UserResponse = await self.api_client.get_user(UserPayload(
-                member_id=str(interaction.user.id), 
-                username=interaction.user.global_name))
+            responsible: UserResponse = await self.user_service.get_user(
+                UserPayload(
+                    mber_id=str(interaction.user.id), 
+                    username=interaction.user.global_name))
             
             state.reservation.status = status
             state.reservation.responsible_id = responsible.id
-            await self.api_client.update_reservation(state.reservation)
+            await self.reservation_service.update_reservation(state.reservation)
             async with state.lock:
                 del self.user_states[user.id]
 

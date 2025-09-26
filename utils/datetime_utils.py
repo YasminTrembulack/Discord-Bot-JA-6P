@@ -19,12 +19,12 @@ def generate_time_slots(start_time: datetime, end_time: datetime, interval: int)
         current += timedelta(minutes=interval)
     return slots
 
-def get_available_times(start_time: datetime, end_time: datetime, interval: int, unavailable_times: list) -> list:
+def get_available_time_slots(start_time: datetime, end_time: datetime, interval: int, unavailable_time_slots: list) -> list:
     available = []
     current = start_time
     while current < end_time:
         time_str = current.strftime("%H:%M")
-        if time_str not in unavailable_times:
+        if time_str not in unavailable_time_slots:
             available.append(time_str)
         current += timedelta(minutes=interval)
     return available

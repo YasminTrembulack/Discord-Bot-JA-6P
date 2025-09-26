@@ -36,7 +36,7 @@ class ReservationService:
         logger.info(f"⏰ Reserva realizada:\n {reservation.model_dump()}")
         return uuid4() # deve retor o id da reserva criada
     
-    async def get_unavailable_times_by_equipment(self, next_days: List[str], equipment_id: UUID):
+    async def fetch_unavailable_slots(self, next_days: List[str], equipment_id: UUID):
         logger.info(f"Buscando horarios indisponiveis do equipamento {equipment_id}")
         horarios = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"]
         mock_response = { day: sorted(random.sample(horarios, 7)) for day in next_days }

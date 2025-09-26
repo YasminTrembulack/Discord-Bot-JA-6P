@@ -24,7 +24,7 @@ class UserReservationState:
     def __init__(self):
         self.lock = Lock()
         self.reservation: Optional[ReservationResponse] = None
-        self.unavailable_times = []
+        self.unavailable_time_slots = []
         self.equipment_name = None
         self.equipment_id = None
         self.start_time = None
