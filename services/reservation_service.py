@@ -13,10 +13,11 @@ class ReservationService:
 
     async def get_reservation_config(self):
         data = {
+            "bot_id": "1234",
             "reservation_chanel": "📅reservations", # "📅reservations"
             "reservation_approval_chanel": None, # "📝pending-approval"
-            "start_time": "08:00",
-            "end_time": "21:00",
+            "opening_time": "08:00",
+            "closing_time": "21:00",
             "max_reservation_blocks": 2,
             "min_reservation": 60,
             "max_reservation_days": 7,
@@ -25,8 +26,8 @@ class ReservationService:
         }
 
         # Conversão das strings para time / datetime
-        data['start_time'] = datetime.strptime(data['start_time'], "%H:%M").time()
-        data['end_time'] = datetime.strptime(data['end_time'], "%H:%M").time()
+        data['opening_time'] = datetime.strptime(data['opening_time'], "%H:%M").time()
+        data['closing_time'] = datetime.strptime(data['closing_time'], "%H:%M").time()
         data['holidays'] = [datetime.strptime(d, "%Y-%m-%d") for d in data['holidays']]
 
         # Criação da instância
