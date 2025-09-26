@@ -9,7 +9,7 @@ from services.api_client import APIClient
 
 class Events(Cog):
     bot: Bot
-    api_client: APIClient
+    _api_client: APIClient
 
     def __init__(self, bot):
         self.bot = bot
@@ -19,7 +19,7 @@ class Events(Cog):
         logger.info(f"✅ Bot online as {self.bot.user}")
     
         try:
-            info = await self.bot.api_client.info()
+            info = await self.bot._api_client.info()
             if info:
                 logger.success(f"🌐 API respondeu com sucesso: {info}")
             else:

@@ -10,7 +10,6 @@ from discord.ui import Button, View
 from models.equipment import EquipmentResponse
 from models.reservation import ReservationConfig, ReservationPayload, UserReservationState
 from models.user import UserPayload, UserResponse
-from services.api_client import APIClient
 
 from services.equipment_service import EquipmentService
 from services.reservation_service import ReservationService
