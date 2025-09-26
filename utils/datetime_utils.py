@@ -29,12 +29,12 @@ def get_available_time_slots(start_time: datetime, end_time: datetime, interval:
         current += timedelta(minutes=interval)
     return available
 
-def generate_possible_end_times(current: datetime, blocks: int,unavailable_times: list, interval: int, end_time: datetime) -> list:
+def generate_possible_end_times(current: datetime, blocks: int, unavailable_time_slots: list, interval: int, end_time: datetime) -> list:
     possible_ends = []
     while True:
         current += timedelta(minutes=interval)
         time_str = current.strftime("%H:%M")
-        if time_str in unavailable_times or current >= end_time:
+        if time_str in unavailable_time_slots or current >= end_time:
             possible_ends.append(time_str)
             break
         possible_ends.append(time_str)
