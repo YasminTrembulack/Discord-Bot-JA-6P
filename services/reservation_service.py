@@ -3,11 +3,12 @@ import random
 from typing import List
 from uuid import UUID, uuid4
 from loguru import logger
-from models.reservation import ReservationConfig, ReservationPayload, ReservationResponse
+from models.reservation import BotConfig, ReservationPayload, ReservationResponse
 from services.api_client import APIClient
 
 class ReservationService:
     def __init__(self, client: APIClient):
+        self.base_route = "/reservation"
         self.client = client
 
     async def get_reservation_config(self):
@@ -29,7 +30,7 @@ class ReservationService:
         data['holidays'] = [datetime.strptime(d, "%Y-%m-%d") for d in data['holidays']]
 
         # Criação da instância
-        config = ReservationConfig(**data)
+        config = BotConfig(**data)
         return config
     
     async def create_reservation(self, reservation: ReservationPayload) -> UUID:

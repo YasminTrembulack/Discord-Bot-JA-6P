@@ -8,7 +8,7 @@ from discord.ext.commands import Bot, Cog, command
 from discord.ui import Button, View
 
 from models.equipment import EquipmentResponse
-from models.reservation import ReservationConfig, ReservationPayload, UserReservationState
+from models.reservation import BotConfig, ReservationPayload, UserReservationState
 from models.user import UserPayload, UserResponse
 
 from services.equipment_service import EquipmentService
@@ -25,7 +25,7 @@ from views.buttons import DateButton, EquipmentButton, TimeButton
 
 
 class ReservationManager(Cog):
-    config: ReservationConfig
+    config: BotConfig
     user_states: Dict[int, UserReservationState]
 
     def __init__(self, bot, user_service, reservation_service, equipment_service):
@@ -95,8 +95,8 @@ class ReservationManager(Cog):
             unavailable_time_slots = unavailable_time_slots_by_date.get(date_str, [])
 
             available_time_slots = get_available_time_slots(
-                start_time=datetime.strptime(self.config.start_time.strftime("%H:%M"), "%H:%M"),
-                end_time=datetime.strptime(self.config.end_time.strftime("%H:%M"), "%H:%M"),
+                start_time=datetime.strptime(self.config.opening_time.strftime("%H:%M"), "%H:%M"),
+                end_time=datetime.strptime(self.config.closing_time.strftime("%H:%M"), "%H:%M"),
                 interval=self.config.min_reservation,
                 unavailable_time_slots=unavailable_time_slots,)
 
@@ -123,8 +123,8 @@ class ReservationManager(Cog):
         view = View()
 
         time_slots = generate_time_slots(
-            start_time=datetime.strptime(self.config.start_time.strftime("%H:%M"), "%H:%M"),
-            end_time=datetime.strptime(self.config.end_time.strftime("%H:%M"), "%H:%M"),
+            start_time=datetime.strptime(self.config.opening_time.strftime("%H:%M"), "%H:%M"),
+            end_time=datetime.strptime(self.config.closing_time.strftime("%H:%M"), "%H:%M"),
             interval=self.config.min_reservation,)
 
         for time_str in time_slots:
@@ -152,7 +152,7 @@ class ReservationManager(Cog):
         view = View()
 
         possible_ends = generate_possible_end_times(
-            end_time=datetime.strptime(self.config.end_time.strftime("%H:%M"), "%H:%M"),
+            end_time=datetime.strptime(self.config.closing_time.strftime("%H:%M"), "%H:%M"),
             current=datetime.strptime(state.start_time, "%H:%M"),
             blocks=self.config.max_reservation_blocks,
             unavailable_time_slots=state.unavailable_time_slots,

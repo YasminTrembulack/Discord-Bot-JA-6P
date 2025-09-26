@@ -31,18 +31,21 @@ class UserReservationState:
         self.end_time = None
         self.date = None
 
-
-class ReservationConfig(BaseModel):
-    end_time: time = Field(..., description="Horário de término do funcionamento")
-    start_time: time = Field(..., description="Horário de início do funcionamento")
+  
+class BotConfig(BaseModel):
+    bot_id: str = Field(..., description="ID único do bot")
+    opening_time: time = Field(..., description="Horário de término do funcionamento")
+    closing_time: time = Field(..., description="Horário de início do funcionamento")
     min_reservation: int = Field(..., gt=0, description="Tempo mínimo de cada reserva em minutos")
     max_reservation_days: int = Field(..., gt=0, description="Quantos dias no futuro é possível reservar")
+    max_reservation_blocks: int = Field(..., description="Quantos blocos de min_reservation podem ser encaixados em uma reserva (ex: 3).")
     holidays: Optional[List[datetime]] =  Field(default_factory=list, description="Lista de datas bloqueadas / feriados")
     days_of_week: List[int] = Field(default_factory=lambda: [1,2,3,4,5], description="Dias da semana permitidos (1=Segunda, 7=Domingo)")
-    max_reservation_blocks: int = Field(..., description="Quantos blocos de min_reservation podem ser encaixados em uma reserva (ex: 3).")
     reservation_chanel: Optional[str] = Field(default=None, description="Nome do canal onde o bot vai ver a reservas, caso None lê todo os canais")
     reservation_approval_chanel: Optional[str] = Field(default=None, description="Nome do canal onde o bot vai mandas as reservas para aprovação, caso None ele entende que não precisa de aprovação")
-
+    admin_roles: List[str] = Field(default_factory=list, description="IDs de roles de Admin do servidor")
+    approver_roles: List[str] = Field(default_factory=list, description="IDs de roles que podem aprovar reservas")
+    
     @field_validator('end_time')
     def check_time_order(cls, v, info):
         start_time = info.data.get('start_time')
