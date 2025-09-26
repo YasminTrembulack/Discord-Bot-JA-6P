@@ -4,6 +4,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 
 from services.api_client import APIClient
+from services.user_service import UserService
 
 load_dotenv()
 
@@ -19,6 +20,7 @@ class MyBot(commands.Bot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.api_client = APIClient(API_BASE_URL)
+        self.user_service = UserService(self.api_client)
 
     async def setup_hook(self):
         await self.api_client.start()  # 🔹 inicia a sessão

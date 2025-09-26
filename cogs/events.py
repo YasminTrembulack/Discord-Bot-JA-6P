@@ -1,12 +1,16 @@
 from loguru import logger
 
-import discord
-from discord.ext.commands import Cog
+from discord import Member
+from discord.ext.commands import Cog, Bot
 
+from services.api_client import APIClient
 from services.models import UserPayload
 
 
 class Events(Cog):
+    bot: Bot
+    api_client: APIClient
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -15,7 +19,7 @@ class Events(Cog):
         logger.info(f"✅ Bot online as {self.bot.user}")
     
         try:
-            info = await self.bot.api_client.get_info()
+            info = await self.bot.api_client.info()
             if info:
                 logger.success(f"🌐 API respondeu com sucesso: {info}")
             else:
@@ -24,7 +28,7 @@ class Events(Cog):
             logger.exception(f"❌ Erro ao chamar a API: {e}")
 
     @Cog.listener()
-    async def on_member_join(self, member: discord.Member):
+    async def on_member_join(self, member: Member):
         logger.info(f"👤 Novo membro entrou: {member.name} ({member.id})")
         try:
             await self.bot.api_client.create_user(
