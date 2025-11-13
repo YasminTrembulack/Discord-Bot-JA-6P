@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 
 from cogs.events_manager import EventsManager
 from cogs.reservation_manager import ReservationManager
+from cogs.equipment_manager import EquipmentManager
 from services.api_client import APIClient
 from services.equipment_service import EquipmentService
 from services.reservation_service import ReservationService
@@ -32,6 +33,8 @@ class MyBot(commands.Bot):
         await self._api_client.start()
         
         await self.add_cog(EventsManager(self))
+        await self.add_cog(EquipmentManager(
+            self, self.user_service, self.reservation_service, self.equipment_service))
         await self.add_cog(ReservationManager(
             self, self.user_service, self.reservation_service, self.equipment_service))
 

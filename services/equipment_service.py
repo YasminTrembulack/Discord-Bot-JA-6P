@@ -6,10 +6,7 @@ from services.api_client import APIClient
 
 class EquipmentService:
     def __init__(self, client: APIClient):
-        self.client = client
-        
-    async def get_equipments(self) -> List[EquipmentResponse]:
-        return [
+        self.mock_equipment = [
             EquipmentResponse(
                 id=uuid4(),
                 name="3D Printer - Prusa i3 MK3S",
@@ -47,3 +44,11 @@ class EquipmentService:
                 deleted_at=None
             ),
         ]
+        self.client = client
+        
+    async def get_equipments(self) -> List[EquipmentResponse]:
+        return self.mock_equipment
+
+    async def create_equipment(self, equipment) -> EquipmentResponse:
+        self.mock_equipment.append(equipment)
+        return equipment

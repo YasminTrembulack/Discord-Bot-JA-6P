@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from loguru import logger
 
@@ -21,6 +21,7 @@ from utils.datetime_utils import (
     get_available_time_slots,
 )
 from views.buttons import DateButton, EquipmentButton, TimeButton
+from views.pagination_reservation import PaginatedReservationView
 
 
 
@@ -289,6 +290,32 @@ class ReservationManager(Cog):
             return False
 
 
+    @command(name="reservas")
+    async def list_reservations(self, ctx: Context, date: Optional[str] = None):
+        """
+        Lista as reservas paginadas. 
+        Se passar uma data (YYYY-MM-DD), filtra apenas as reservas desse dia.
+        """
+        reservations = await self.reservation_service.get_reservations()
+        
+        if date:
+            try:
+                filter_date = datetime.strptime(date, "%Y-%m-%d").date()
+                reservations = [
+                    r for r in reservations
+                    if r.start.date() == filter_date or r.end.date() == filter_date
+                ]
+            except ValueError:
+                await ctx.send("Formato de data inválido. Use YYYY-MM-DD.")
+                return
+
+        if not reservations:
+            await ctx.send("Nenhuma reserva encontrada.")
+            return
+
+        view = PaginatedReservationView(reservations, per_page=5)
+        await ctx.send(embed=view.get_page_embed(), view=view)
+    
 # ---------------- Setup function ----------------
 async def setup(bot):
     await bot.add_cog(ReservationManager(bot))

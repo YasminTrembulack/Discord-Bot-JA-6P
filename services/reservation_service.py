@@ -9,13 +9,14 @@ from services.api_client import APIClient
 class ReservationService:
     def __init__(self, client: APIClient):
         self.base_route = "/reservation"
+        self.mock_reservation = []
         self.client = client
 
     async def get_reservation_config(self):
         data = {
             "bot_id": "1234",
             "reservation_chanel": "📅reservations", # "📅reservations"
-            "reservation_approval_chanel": None, # "📝pending-approval"
+            "reservation_approval_chanel": "📝pending-approval", # 
             "opening_time": "08:00",
             "closing_time": "21:00",
             "max_reservation_blocks": 2,
@@ -36,6 +37,7 @@ class ReservationService:
     
     async def create_reservation(self, reservation: ReservationPayload) -> UUID:
         logger.info(f"⏰ Reserva realizada:\n {reservation.model_dump()}")
+        self.mock_reservation.append(reservation)
         return uuid4() # deve retor o id da reserva criada
     
     async def fetch_unavailable_slots(self, next_days: List[str], equipment_id: UUID):
@@ -57,3 +59,6 @@ class ReservationService:
 
         # Mock:
         return uuid4()
+    
+    async def get_reservations(self):
+        return self.mock_reservation
