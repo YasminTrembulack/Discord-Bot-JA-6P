@@ -4,51 +4,29 @@ from datetime import datetime, timezone
 from models.user import UserPayload, UserResponse
 from services.api_client import APIClient
 
+
 class UserService:
     def __init__(self, client: APIClient):
         self.client = client
 
     async def create_user(self, user: UserPayload) -> UserResponse:
-        """
-        Cria um usuário na API e retorna os dados do usuário criado.
-        """
-        logger.info(f"✅ Registrando usuário: {user.model_dump()}")
-        # Aqui você chamaria algo como:
-        # response = await self.client.post("/users", json=user.dict())
-        # return UserResponse(**response)
+        user_json = user.model_dump()
+        logger.info(f"✅ Registrando usuário: {user_json}")
 
-        # Mock para testes:
-        now = datetime.now(timezone.utc)
-        return UserResponse(
-            id=uuid4(),
-            member_id=user.member_id,
-            username=user.username,
-            full_name=user.full_name,
-            created_at=now,
-            updated_at=now,
-            deleted_at=None
-        )
+        response = await self.client.post("/api/users/register", json=user_json)
 
-    async def get_user(self, user: UserPayload) -> UserResponse:
+        return UserResponse(**response)
+
+    async def get_user(self, discord_id: str) -> UserResponse:
         """
         Busca o usuário na API. Se não existir, você poderia criar um novo usuário.
         """
-        logger.info(f"🔍 Buscando usuário {user.member_id}")
+        logger.info(f"🔍 Buscando usuário {discord_id}")
         # Exemplo de requisição real:
-        # response = await self.client.get(f"/users/{member_id}")
-        # return UserResponse(**response)
+        response = await self.client.get(f"/api/users/{discord_id}")
+        
+        return [UserResponse(**r) for r in response]
 
-        # Mock para testes:
-        now = datetime.now(timezone.utc)
-        return UserResponse(
-            id=uuid4(),
-            member_id=user.member_id,
-            username=user.username,
-            full_name=user.full_name,
-            created_at=now,
-            updated_at=now,
-            deleted_at=None
-        )
 
     async def update_user(self, user: UserResponse) -> UserResponse:
         """

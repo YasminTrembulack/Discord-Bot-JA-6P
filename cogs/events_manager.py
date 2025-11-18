@@ -4,6 +4,7 @@ from discord import Member
 from discord.ext.commands import Cog, Bot
 
 from models.user import UserPayload
+from services.user_service import UserService
 from services.api_client import APIClient
 
 
@@ -11,8 +12,9 @@ class EventsManager(Cog):
     bot: Bot
     _api_client: APIClient
 
-    def __init__(self, bot):
-        self.bot = bot
+    def __init__(self, bot, user_service):
+        self.user_service: UserService = user_service  
+        self.bot: Bot = bot
 
     @Cog.listener()
     async def on_ready(self):
@@ -31,12 +33,12 @@ class EventsManager(Cog):
     async def on_member_join(self, member: Member):
         logger.info(f"👤 Novo membro entrou: {member.name} ({member.id})")
         try:
-            await self.bot.api_client.create_user(
+            await self.user_service.create_user(
             UserPayload(
                 member_id=str(member.id),
-                full_name=member.name,
-                username=member.global_name,
-                created_at=member.joined_at,
+                full_name=member.global_name,
+                # created_at=member.joined_at,
+                # username=member.name,
             ))
         except Exception as e:
             logger.exception(f"❌ Erro ao registrar usuário na API: {e}")

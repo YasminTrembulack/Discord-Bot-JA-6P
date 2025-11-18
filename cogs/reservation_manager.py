@@ -233,10 +233,7 @@ class ReservationManager(Cog):
                 await interaction.response.send_message("⚠️ Você não tem permissão para aprovar ou recusar reservas.", ephemeral=True)
                 return
 
-            responsible: UserResponse = await self.user_service.get_user(
-                UserPayload(
-                    mber_id=str(interaction.user.id), 
-                    username=interaction.user.global_name))
+            responsible: UserResponse = await self.user_service.get_user(str(interaction.user.id))
             
             state.reservation.status = status
             state.reservation.responsible_id = responsible.id

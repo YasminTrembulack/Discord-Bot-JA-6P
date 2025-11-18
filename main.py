@@ -32,9 +32,12 @@ class MyBot(commands.Bot):
     async def setup_hook(self):
         await self._api_client.start()
         
-        await self.add_cog(EventsManager(self))
+        await self.add_cog(EventsManager(
+            self, self.user_service))
+
         await self.add_cog(EquipmentManager(
             self, self.user_service, self.reservation_service, self.equipment_service))
+
         await self.add_cog(ReservationManager(
             self, self.user_service, self.reservation_service, self.equipment_service))
 

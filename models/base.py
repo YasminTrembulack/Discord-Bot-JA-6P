@@ -9,4 +9,4 @@ class BaseResponse(BaseModel):
     id: UUID
     created_at: datetime
     updated_at: datetime
-    deleted_at: Optional[datetime]
+    # deleted_at: Optional[datetime]
