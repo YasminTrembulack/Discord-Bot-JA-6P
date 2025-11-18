@@ -43,7 +43,7 @@ class ReservationService:
             id=uuid4(),
             updated_at=now,
             created_at=now,
-            deleted_at=None
+            deleted_at=None,
             **reservation.model_dump()
         )
     
