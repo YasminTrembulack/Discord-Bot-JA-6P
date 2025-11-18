@@ -5,14 +5,16 @@ from discord.ext.commands import Cog, Bot
 
 from models.user import UserPayload
 from services.api_client import APIClient
+from services.user_service import UserService
 
 
 class EventsManager(Cog):
     bot: Bot
     _api_client: APIClient
 
-    def __init__(self, bot):
-        self.bot = bot
+    def __init__(self, bot, user_service):
+        self.bot: Bot = bot
+        self.user_service: UserService = user_service     
 
     @Cog.listener()
     async def on_ready(self):
@@ -31,7 +33,7 @@ class EventsManager(Cog):
     async def on_member_join(self, member: Member):
         logger.info(f"👤 Novo membro entrou: {member.name} ({member.id})")
         try:
-            await self.bot.api_client.create_user(
+            await self.user_service.create_user(
             UserPayload(
                 member_id=str(member.id),
                 full_name=member.name,
@@ -43,4 +45,4 @@ class EventsManager(Cog):
 
 
 async def setup(bot):
-    await bot.add_cog(Events(bot))
+    await bot.add_cog(EventsManager(bot))
