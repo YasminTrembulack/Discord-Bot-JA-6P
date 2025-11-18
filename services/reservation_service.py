@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 import random
 from typing import List
 from uuid import UUID, uuid4
@@ -38,7 +38,13 @@ class ReservationService:
     async def create_reservation(self, reservation: ReservationPayload) -> UUID:
         logger.info(f"⏰ Reserva realizada:\n {reservation.model_dump()}")
         self.mock_reservation.append(reservation)
-        return uuid4() # deve retor o id da reserva criada
+        now = datetime.now(timezone.utc)
+        return ReservationResponse(
+            id=uuid4(),
+            updated_at=now,
+            created_at=now,
+            **reservation
+        )
     
     async def fetch_unavailable_slots(self, next_days: List[str], equipment_id: UUID):
         logger.info(f"Buscando horarios indisponiveis do equipamento {equipment_id}")
@@ -58,7 +64,11 @@ class ReservationService:
         # return UserResponse(**response)
 
         # Mock:
-        return uuid4()
+        now = datetime.now(timezone.utc)
+        return ReservationResponse(
+            updated_at=now,
+            **reservation
+        )
     
     async def get_reservations(self):
         return self.mock_reservation
