@@ -43,7 +43,7 @@ class ReservationService:
             id=uuid4(),
             updated_at=now,
             created_at=now,
-            **reservation
+            **reservation.model_dump()
         )
     
     async def fetch_unavailable_slots(self, next_days: List[str], equipment_id: UUID):
@@ -67,7 +67,7 @@ class ReservationService:
         now = datetime.now(timezone.utc)
         return ReservationResponse(
             updated_at=now,
-            **reservation
+            **reservation.model_dump()
         )
     
     async def get_reservations(self):
