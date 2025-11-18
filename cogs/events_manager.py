@@ -1,6 +1,6 @@
 from loguru import logger
 
-from discord import Member
+from discord import Member, utils
 from discord.ext.commands import Cog, Bot
 
 from models.user import UserPayload
@@ -32,6 +32,15 @@ class EventsManager(Cog):
     @Cog.listener()
     async def on_member_join(self, member: Member):
         logger.info(f"👤 Novo membro entrou: {member.name} ({member.id})")
+        welcome_channel = utils.get(member.guild.text_channels, name="welcome")
+
+        if welcome_channel:
+            await welcome_channel.send(
+                f"🎉 Bem-vindo(a) {member.mention} ao servidor!\n"
+                "Sinta-se à vontade para explorar os canais e participar com a gente! 💛"
+            )
+        else:
+            logger.warning("⚠️ Canal 'welcome' não encontrado.")
         try:
             await self.user_service.create_user(
             UserPayload(
