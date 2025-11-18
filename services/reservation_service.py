@@ -65,11 +65,8 @@ class ReservationService:
         # return UserResponse(**response)
 
         # Mock:
-        now = datetime.now(timezone.utc)
-        return ReservationResponse(
-            updated_at=now,
-            **reservation.model_dump()
-        )
+        reservation.updated_at = datetime.now(timezone.utc)
+        return ReservationResponse(**reservation.model_dump())
     
     async def get_reservations(self):
         return self.mock_reservation
